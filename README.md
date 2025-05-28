@@ -64,14 +64,57 @@ open bendita_WT.html
 
 ### Step 3: Salesforce Usage
 
+#### Marketing Cloud
+
 - Do you have Marketing Cloud?
-  - If **yes**: Questions about its use and need for consulting
-  - If **no**: Ask if you plan to acquire it
-- Do you use other Salesforce Clouds?
-  - If **yes**: Show checkbox list to select them
-- Services of interest (multiple selections)
-- Additional Comments
+  - If **yes**:
+    - Do you feel you are getting the most out of Marketing Cloud?
+    - Would you like a specialized team to advise you?
+  - If **no**:
+    - Do you plan to acquire Marketing Cloud?
+      - Yes, right now
+      - Yes, in a couple of months
+      - Yes, maybe next year
+      - No, not at the moment
+
+#### Other Salesforce Clouds
+
+- Do you have another Salesforce cloud?
+  - If **yes**: A list of Salesforce clouds is displayed to select the ones the user has:
+    - Sales Cloud
+    - Service Cloud
+    - Experience Cloud
+    - Data Cloud
+    - Marketing Cloud Account Engagement (Pardot)
+    - Field Service
+    - Digital Engagement
+    - Salesforce Maps
+    - Bots de Einstein
+
+#### Services of Interest
+
+- Multiple selection checkboxes including:
+  - Salesforce Digital Marketing Agency Services
+  - Marketing Cloud Implementation
+  - Core Implementation (Sales/Service)
+  - Digital Asset Management and Support
+  - Advertising Studio Implementation
+  - Commerce Cloud Implementation
+  - Digital Engagement Implementation
+  - Intelligence Advance Implementation
+  - Marketing Cloud Account Engagement (Pardot) Implementation
+  - Marketing Cloud Engagement Implementation
+  - Marketing Cloud Intelligence Implementation
+  - Sales Cloud Implementation
+  - Service Cloud Implementation
+  - Salesforce Training Services
+  - Accompaniment / Support
+
+#### Final
+
+- Additional Comments (textarea)
 - Google reCAPTCHA
+
 
 ---
 
@@ -93,6 +136,39 @@ This form includes **Salesforce OAuth token request** and submits payload via `f
 
 ---
 
+## 🧾 Sample JSON Payload Sent to the API
+
+When the form is successfully validated and submitted, it builds a JSON payload like the following:
+
+```json
+{
+  "firstName": "Johann",
+  "lastName": "Amaya",
+  "email": "benditaessence@benditaess.com",
+  "indicative": "+57",
+  "mobilePhone": "3222799262",
+  "title": "Vicepresidente",
+  "company": "Bendita Essence",
+  "industry": "Biotechnology",
+  "numberOfEmployees": "51 - 100",
+  "hasMarketingCloud": false,
+  "getsAdvantageOfMC": null,
+  "wantsSpecializedConsulting": null,
+  "plansToAcquireMC": "Si, en un par de meses",
+  "hasOtherSalesforceClouds": false,
+  "otherSalesforceClouds": null,
+  "interestedServices": "Servicios de agencia;Implementación marketing;Implementación core;Implementación Advertising Studio;Implementación Commerce Cloud",
+  "description": "taastt",
+  "utm_source": null,
+  "utm_medium": null,
+  "utm_campaign": null,
+  "leadSource": "Eventos Salesforce Form",
+  "campaignName": "Agentforce World Tour 2025 Bogotá"
+}
+```
+
+This payload is sent to the Salesforce Apex REST API using an access token obtained via OAuth2 credentials.
+
 ## 📂 File Structure
 
 ```
@@ -105,15 +181,8 @@ world-tour-form/
 
 ## 📌 Credits
 
-Created by Johann Amaya at Bendita ESS for the Agentforce World Tour 2025.
+Created by Johann Amaya at Bendita Essence for the Agentforce World Tour 2025.
 
----
-
-## 🧼 TODO
-
-- [ ] Move Salesforce credentials to a secure backend service
-- [ ] Add multilingual support (ES/EN)
-- [ ] Log analytics events on each step
 
 ---
 
