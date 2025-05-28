@@ -30,7 +30,7 @@ This project is a responsive, multistep HTML form built for the Salesforce World
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/world-tour-form.git
+git clone https://github.com/JohannBulls/Salesforce-World-Tour-Multistep-Form.git
 cd world-tour-form
 ```
 
