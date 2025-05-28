@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en"> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/css/intlTelInput.min.css" />
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <script>
+        // The timestamp function and captcha_settings are more relevant for Salesforce's advanced Web-to-Lead reCAPTCHA.
+        // For a custom Apex API, client-side validation of reCAPTCHA completion is still good,
+        // but the timestamp mechanism isn't directly used by the Apex call unless specifically designed for it.
+        function timestamp() {
+            var response = document.getElementById("g-recaptcha-response");
+            if (response == null || response.value.trim() == "") {
+                var captchaSettingsElement = document.getElementsByName("captcha_settings")[0];
+                if (captchaSettingsElement && captchaSettingsElement.value) {
+                    try {
+                        var elems = JSON.parse(captchaSettingsElement.value);
+                        elems["ts"] = JSON.stringify(new Date().getTime());
+                        captchaSettingsElement.value = JSON.stringify(elems);
+                    } catch (e) {
+                        console.error("Error parsing captcha_settings:", e);
+                        var defaultElems = { "keyname": "Bendita_Essence", "fallback": "true", "orgId": "00D1U000000G0Fq", "ts": "" };
+                        defaultElems["ts"] = JSON.stringify(new Date().getTime());
+                        captchaSettingsElement.value = JSON.stringify(defaultElems);
+                    }
+                }
+            }
+        }
+        setInterval(timestamp, 500); 
+    </script>
+    <style>
+        /* General and Bootstrap Styles from user */
+        .btn-check+.btn { width: auto; white-space: normal; padding: 0.5rem 1rem; display: inline-flex; align-items: center; margin-bottom: 8px !important; width: 100% !important; text-align: left !important; }
+        .iti { width: 100% !important; }
+        .step { display: none !important; }
+        .step.active { display: block !important; }
+        .scroll-checkbox-list { max-height: 200px !important; overflow-y: auto !important; border: 1px solid #dee2e6 !important; border-radius: 8px !important; padding: 15px !important; }
+        .btn-group { width: 100% !important; }
+        .hidden-questions, .hidden-field { display: none !important; }
+        .btn-purple { background-color: #6f42c1 !important; border-color: #6f42c1 !important; color: #fff !important; }
+        .btn-purple:hover { background-color: #5a32a3 !important; border-color: #532f91 !important; color: #fff !important; }
+        .btn-outline-purple { color: #6f42c1 !important; border-color: #6f42c1 !important; }
+        .btn-outline-purple:hover { color: #fff !important; background-color: #6f42c1 !important; border-color: #6f42c1 !important; }
+        .btn-check:checked+.btn-outline-purple, .btn-check:active+.btn-outline-purple, .btn-outline-purple:active, .btn-outline-purple.active, .btn-outline-purple.dropdown-toggle.show { color: #fff !important; background-color: #6f42c1 !important; border-color: #6f42c1 !important; }
+        .is-invalid-group .btn-group .btn { border-color: var(--bs-form-invalid-border-color) !important; }
+        .is-invalid-group .btn-check:checked+.btn-outline-purple { color: #fff !important; background-color: #6f42c1 !important; border-color: #6f42c1 !important; }
+        .is-invalid-group .btn-check:checked+.btn-outline-success { color: #fff !important; background-color: var(--bs-success) !important; border-color: var(--bs-success) !important; }
+        .is-invalid-group .btn-check:checked+.btn-outline-danger { color: #fff !important; background-color: var(--bs-danger) !important; border-color: var(--bs-danger) !important; }
+        .is-invalid-group .scroll-checkbox-list { border-color: var(--bs-form-invalid-border-color) !important; }
+        .recaptcha-error-message { color: var(--bs-form-invalid-color) !important; display: none !important; width: 100% !important; margin-top: .25rem !important; font-size: .875em !important; }
+        #emailErrorPersonal.d-block { display: block !important; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <form action="https://bendita--escuela25.sandbox.my.salesforce.com/services/apexrest/WorldTour/v1/api/lead"
+                    method="POST" class="bg-white p-4 shadow rounded" id="salesforceForm" novalidate>
+
+                    <input type="hidden" name="captcha_settings" value='{"keyname":"Bendita_Essence","fallback":"true","orgId":"00D1U000000G0Fq","ts":""}'>
+                    <input type="hidden" name="oid" value="00D1U000000G0Fq"> <input type="hidden" name="retURL" value="https://benditaessence.com/thankyoupage/"> <input type="hidden" name="debugEmail" value="jhon_moreno@benditaess.com"> <input id="00NPk000001TNLd_hidden" name="00NPk000001TNLd" type="checkbox" value="1" class="hidden-field" />
+                    <input id="00NPk000001TNLe_hidden" name="00NPk000001TNLe" type="checkbox" value="1" class="hidden-field" />
+                    <input id="00NPk000001TNLg_hidden" name="00NPk000001TNLg" type="checkbox" value="1" class="hidden-field" />
+                    <input type="hidden" id="00NPk000001P9PJ_hidden" name="00NPk000001P9PJ"> <div class="text-center mb-4">
+                        <img src="https://benditaessence.com/wp-content/uploads/2024/04/logo_salesforce.png" alt="Salesforce Logo"
+                            class="img-fluid rounded" style="max-height: 90px; width: auto" draggable="false"
+                            onerror="this.onerror=null; this.src='https://placehold.co/200x90/6f42c1/ffffff?text=Logo';" />
+                    </div>
+
+                    <div class="step active" id="step1">
+                        <div class="mb-3">
+                            <label for="evento" class="form-label">Event</label>
+                            <select class="form-select" id="evento" name="evento" title="Event" disabled>
+                                <option value="WT Bogotá, Colombia 2024">Agentforce World Tour 2025 Bogotá</option>
+                            </select>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name" required />
+                                <div class="invalid-feedback">Please enter your first name.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name" required />
+                                <div class="invalid-feedback">Please enter your last name.</div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required />
+                                <div class="invalid-feedback">Please enter a valid email.</div>
+                                <div class="invalid-feedback" id="emailErrorPersonal" style="display: none;">Personal emails are not allowed. Please use a corporate email.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mobile" class="form-label">Mobile Phone</label>
+                                <input type="tel" class="form-control" id="mobile" name="mobile" required />
+                                <div class="invalid-feedback">Please enter a valid phone number.</div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-purple" id="btnSiguientePaso1">Next</button>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step2">
+                        <div class="mb-3">
+                            <label for="company" class="form-label">Company</label>
+                            <input type="text" class="form-control" id="company" name="company" required />
+                            <div class="invalid-feedback">Please enter the company name.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="industry" class="form-label">Industry</label>
+                            <select class="form-select" id="industry" name="industry" required>
+                                <option value="">Select an industry</option>
+                                <option value="Agriculture">Agriculture</option><option value="Apparel">Apparel</option><option value="Banking">Banking</option><option value="Biotechnology">Biotechnology</option><option value="Chemicals">Chemicals</option><option value="Communications">Communications</option><option value="Construction">Construction</option><option value="Consulting">Consulting</option><option value="Education">Education</option><option value="Electronics">Electronics</option><option value="Energy">Energy</option><option value="Engineering">Engineering</option><option value="Entertainment">Entertainment</option><option value="Environmental">Environmental</option><option value="Finance">Finance</option><option value="Food & Beverage">Food & Beverage</option><option value="Government">Government</option><option value="Healthcare">Healthcare</option><option value="Hospitality">Hospitality</option><option value="Insurance">Insurance</option><option value="Machinery">Machinery</option><option value="Manufacturing">Manufacturing</option><option value="Media">Media</option><option value="Not For Profit">Not For Profit</option><option value="Recreation">Recreation</option><option value="Retail">Retail</option><option value="Shipping">Shipping</option><option value="Technology">Technology</option><option value="Telecommunications">Telecommunications</option><option value="Transportation">Transportation</option><option value="Utilities">Utilities</option><option value="Other">Other</option>
+                            </select>
+                            <div class="invalid-feedback">Please select an industry.</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="profile" class="form-label">Job Title</label>
+                                <select class="form-select" id="profile" name="profile" title="Job Profile" required>
+                                    <option value="">Select a job title</option>
+                                    <option value="Presidente">President</option><option value="Vicepresidente">Vice President</option><option value="Director">Director</option><option value="Coordinador">Coordinator</option><option value="Asistente">Assistant</option><option value="Ejecutivo">Executive</option><option value="Auxiliar">Auxiliary</option><option value="No Identificado">Not Identified</option><option value="Otro">Other</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a job title.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="totalEmployees" class="form-label">Number of Employees</label>
+                                <select class="form-select" id="totalEmployees" name="totalEmployees" title="Number of company employees" required>
+                                    <option value="">Select a range</option>
+                                    <option value="1 - 10">1 - 10</option><option value="11 - 50">11 - 50</option><option value="51 - 100">51 - 100</option><option value="101 - 200">101 - 200</option> <option value="201 - 500">201 - 500</option><option value="501 - 1000">501 - 1000</option><option value="max 1000">More than 1000</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a range.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="mostrarPaso(1)">Back</button>
+                            <button type="button" class="btn btn-purple" id="btnSiguientePaso2">Next</button>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step3">
+                        <h5 class="mb-4 text-center">Tell us more about Marketing Cloud and Salesforce</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3" id="groupHaveMarketingCloud">
+                                <label class="form-label d-block mb-2">Do you have Marketing Cloud?</label>
+                                <div class="btn-group" role="group" aria-label="Marketing Cloud">
+                                    <input type="radio" class="btn-check" name="haveMarketingCloud" id="marketingCloud-si" autocomplete="off" value="si" required />
+                                    <label class="btn btn-outline-success" for="marketingCloud-si">Yes</label>
+                                    <input type="radio" class="btn-check" name="haveMarketingCloud" id="marketingCloud-no" autocomplete="off" value="no" required />
+                                    <label class="btn btn-outline-danger" for="marketingCloud-no">No</label>
+                                </div>
+                                <div class="invalid-feedback" id="haveMarketingCloudError" style="display: none;">Please select an option.</div>
+                            </div>
+                            <div class="col-md-6 mb-3" id="groupOtraNubeSalesforceRadio">
+                                <label class="form-label d-block mb-2">Do you have another Salesforce cloud?</label>
+                                <div class="btn-group" role="group" aria-label="Other Salesforce cloud">
+                                    <input type="radio" class="btn-check" name="otraNubeSalesforceRadio" id="otraNube-si" autocomplete="off" value="si" required />
+                                    <label class="btn btn-outline-success" for="otraNube-si">Yes</label>
+                                    <input type="radio" class="btn-check" name="otraNubeSalesforceRadio" id="otraNube-no" autocomplete="off" value="no" required />
+                                    <label class="btn btn-outline-danger" for="otraNube-no">No</label>
+                                </div>
+                                <div class="invalid-feedback" id="otraNubeSalesforceRadioError" style="display: none;">Please select an option.</div>
+                            </div>
+                        </div>
+
+                        <div id="preguntasMarketingCloudSi" class="row mb-3 hidden-questions">
+                            <div class="col-md-6 mb-3" id="groupAdvantageMc">
+                                <label class="form-label d-block mb-2">Do you feel you are getting the most out of Marketing Cloud?</label>
+                                <div class="btn-group" role="group" aria-label="Getting the most out of MC">
+                                    <input type="radio" class="btn-check" name="advantageMc" id="provechoMarketingCloud-si" autocomplete="off" value="si" />
+                                    <label class="btn btn-outline-success" for="provechoMarketingCloud-si">Yes</label>
+                                    <input type="radio" class="btn-check" name="advantageMc" id="provechoMarketingCloud-no" autocomplete="off" value="no" />
+                                    <label class="btn btn-outline-danger" for="provechoMarketingCloud-no">No</label>
+                                </div>
+                                <div class="invalid-feedback" id="advantageMcError" style="display: none;">Please select an option.</div>
+                            </div>
+                            <div class="col-md-6 mb-3" id="groupSpecializedConsulting">
+                                <label class="form-label d-block mb-2">Would you like a specialized team to advise you?</label>
+                                <div class="btn-group" role="group" aria-label="Specialized consulting">
+                                    <input type="radio" class="btn-check" name="specializedConsulting" id="asesoriaEspecializada-si" autocomplete="off" value="si" />
+                                    <label class="btn btn-outline-success" for="asesoriaEspecializada-si">Yes, please</label>
+                                    <input type="radio" class="btn-check" name="specializedConsulting" id="asesoriaEspecializada-no" autocomplete="off" value="no" />
+                                    <label class="btn btn-outline-danger" for="asesoriaEspecializada-no">No, thank you</label>
+                                </div>
+                                <div class="invalid-feedback" id="specializedConsultingError" style="display: none;">Please select an option.</div>
+                            </div>
+                        </div>
+
+                        <div id="preguntaAdquirirMarketingCloudNo" class="mb-3 hidden-questions">
+                            <label class="form-label d-block mb-2">Do you plan to acquire Marketing Cloud in the future?</label>
+                            <div class="d-flex flex-column flex-md-row gap-2" role="group" aria-label="Plans to acquire Marketing Cloud" id="groupWantsMarketingCloud">
+                                <div class="flex-fill"><input type="radio" class="btn-check" name="wantsMarketingCloud" id="planAdquirirMC-ahora" value="Si, justo ahora" /> <label class="btn btn-outline-purple w-100" for="planAdquirirMC-ahora">Yes, right now</label></div>
+                                <div class="flex-fill"><input type="radio" class="btn-check" name="wantsMarketingCloud" id="planAdquirirMC-meses" value="Si, en un par de meses" /> <label class="btn btn-outline-purple w-100" for="planAdquirirMC-meses">Yes, in a couple of months</label></div>
+                                <div class="flex-fill"><input type="radio" class="btn-check" name="wantsMarketingCloud" id="planAdquirirMC-anio" value="Si, tal vez el otro año" /> <label class="btn btn-outline-purple w-100" for="planAdquirirMC-anio">Yes, maybe next year</label></div>
+                                <div class="flex-fill"><input type="radio" class="btn-check" name="wantsMarketingCloud" id="planAdquirirMC-no" value="No, por el momento no" /> <label class="btn btn-outline-purple w-100" for="planAdquirirMC-no">No, not at the moment</label></div>
+                            </div>
+                            <div class="invalid-feedback" id="wantsMarketingCloudError" style="display: none;">Please select an option.</div>
+                        </div>
+
+                        <div class="mb-3 hidden-questions" id="contenedorOtrasNubes">
+                            <label class="form-label">Select the Salesforce clouds you have:</label>
+                            <div class="scroll-checkbox-list" id="ownerClouds">
+                                {/* Checkboxes generated by JS, name="ownerClouds" */}
+                            </div>
+                            <div class="invalid-feedback" id="nubesSalesforceError" style="display: none;">If you have other clouds, please select at least one.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Services of interest:</label>
+                            <div class="scroll-checkbox-list" id="interestedServices">
+                                {/* Checkboxes generated by JS, name="interestedServices" */}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description" class="form-label">Additional Comments</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="g-recaptcha" data-sitekey="6LeE9vEpAAAAACZo7tW5VFabDRxdLXEQFLH-bFEs"></div>
+                            <div class="recaptcha-error-message" id="recaptchaError">Please complete the reCAPTCHA.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="mostrarPaso(2)">Back</button>
+                            <button type="submit" class="btn btn-purple">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/intlTelInput.min.js"></script>
+    <script>
+    //<![CDATA[
+    // Initialize international telephone input
+    const inputTelefonoElement = document.querySelector("#mobile");
+    let itiInstance; 
+    if (inputTelefonoElement) {
+        itiInstance = window.intlTelInput(inputTelefonoElement, {
+            initialCountry: "co", // Default country
+            separateDialCode: true, // Show dial code separately
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@18.1.1/build/js/utils.js", // For validation and formatting
+        });
+    } else {
+        console.error("Mobile input element (#mobile) for intlTelInput not found.");
+    }
+
+    // DOM element references
+    const formElement = document.getElementById("salesforceForm");
+    const marketingCloudSiQuestions = document.getElementById("preguntasMarketingCloudSi");
+    const marketingCloudNoQuestion = document.getElementById("preguntaAdquirirMarketingCloudNo");
+    const otrasNubesContainer = document.getElementById("contenedorOtrasNubes");
+    const planAdquirirMCErrorMsg = document.getElementById("wantsMarketingCloudError"); 
+    const recaptchaErrorMsg = document.getElementById("recaptchaError");
+    const emailErrorPersonalMsg = document.getElementById("emailErrorPersonal");
+
+    /**
+     * Displays the specified step in the multi-step form.
+     * @param {number} stepNumber - The step number to display.
+     */
+    function mostrarPaso(stepNumber) {
+        if (!formElement) return;
+        // Hide all steps
+        document.querySelectorAll(".step").forEach((stepDiv) => stepDiv.classList.remove("active"));
+        // Show the target step
+        const currentStepDiv = document.getElementById("step" + stepNumber);
+        if (currentStepDiv) currentStepDiv.classList.add("active");
+
+        // Reset Bootstrap's validation state for the form
+        formElement.classList.remove("was-validated");
+
+        // Hide all individual invalid feedback messages, except for the persistent personal email error if it's currently shown
+        document.querySelectorAll('.invalid-feedback').forEach(el => {
+            const isEmailPersonalError = el.id === 'emailErrorPersonal';
+            const isEmailPersonalErrorVisible = emailErrorPersonalMsg && emailErrorPersonalMsg.style.display === 'block';
+            if (!(isEmailPersonalError && isEmailPersonalErrorVisible)) {
+                 el.style.display = 'none';
+            }
+        });
+        // Remove invalid group styling
+        document.querySelectorAll('.is-invalid-group').forEach(el => el.classList.remove('is-invalid-group'));
+        // Remove invalid styling from individual form controls
+        document.querySelectorAll('.form-control.is-invalid, .form-select.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        
+        // Reset validation state for specific elements like the "other clouds" list
+        const nubesListDiv = document.getElementById("ownerClouds");
+        if (nubesListDiv) nubesListDiv.classList.remove("is-invalid");
+        
+        const nubesErrorDiv = document.getElementById("nubesSalesforceError");
+        if (nubesErrorDiv) nubesErrorDiv.style.display = 'none';
+
+        // Reset validation state for the phone input
+        if (inputTelefonoElement) inputTelefonoElement.classList.remove("is-invalid");
+        // Reset email input validation unless the personal email error is active
+        const emailInputElem = document.getElementById('email');
+         if(emailInputElem && !(emailErrorPersonalMsg && emailErrorPersonalMsg.style.display === 'block')) {
+             emailInputElem.classList.remove('is-invalid');
+         }
+
+        // If moving to step 3, update visibility of conditional questions and reset specific errors
+        if (stepNumber === 3) {
+            updateMarketingCloudQuestionsVisibility();
+            updateOtrasNubesVisibility();
+            const groupPlanAdquirir = document.getElementById('groupWantsMarketingCloud'); 
+            if (planAdquirirMCErrorMsg) planAdquirirMCErrorMsg.style.display = "none";
+            if (groupPlanAdquirir) groupPlanAdquirir.classList.remove("is-invalid-group");
+            if (recaptchaErrorMsg) recaptchaErrorMsg.style.display = "none";
+        }
+    }
+
+    // Options for dynamically generated checkboxes
+    const nubesSalesforceOptions = [
+        { text: "Sales Cloud", value: "Sales Cloud" }, { text: "Service Cloud", value: "Service Cloud" },
+        { text: "Experience Cloud", value: "Experience Cloud" }, { text: "Data Cloud", value: "Data Cloud" },
+        { text: "Marketing Cloud Account Engagement (Pardot)", value: "Pardot" }, { text: "Field Service", value: "Field Service" },
+        { text: "Digital Engagement", value: "Digital Engagement" }, { text: "Salesforce Maps", value: "Salesforce Maps" },
+        { text: "Bots de Einstein", value: "Bots de Einstein" }
+    ];
+    const serviciosInteresOptions = [
+        { text: "Salesforce Digital Marketing Agency Services", value: "Servicios de agencia" }, 
+        { text: "Marketing Cloud Implementation", value: "Implementación marketing" },
+        { text: "Core Implementation (Sales/Service)", value: "Implementación core" }, 
+        { text: "Digital Asset Management and Support", value: "Administración y soporte Assets digitales" },
+        { text: "Advertising Studio Implementation", value: "Implementación Advertising Studio" }, 
+        { text: "Commerce Cloud Implementation", value: "Implementación Commerce Cloud" },
+        { text: "Digital Engagement Implementation", value: "Implementación Digital Engagement" }, 
+        { text: "Intelligence Advance Implementation", value: "Implementación Intelligence Advance" },
+        { text: "Marketing Cloud Account Engagement (Pardot) Implementation", value: "Implementación Marketing Cloud Account Pardot" }, 
+        { text: "Marketing Cloud Engagement Implementation", value: "Implementación Marketing Cloud Engagement" },
+        { text: "Marketing Cloud Intelligence Implementation", value: "Implementación Marketing Cloud Intelligence" }, 
+        { text: "Sales Cloud Implementation", value: "Implementación Sales Cloud" },
+        { text: "Service Cloud Implementation", value: "Implementación Service Cloud" }, 
+        { text: "Salesforce Training Services", value: "Servicios de formación" },
+        { text: "Accompaniment / Support", value: "Acompañamiento" }
+    ];
+
+    /**
+     * Generates checkboxes within a specified container.
+     * @param {string} containerElementId - The ID of the container element.
+     * @param {Array<object>} itemsArray - An array of objects, each with 'text' and 'value' properties.
+     * @param {string} fieldName - The 'name' attribute for the generated checkboxes.
+     */
+    function generateCheckboxes(containerElementId, itemsArray, fieldName) {
+        const container = document.getElementById(containerElementId);
+        if (!container) { console.warn(`Checkbox container #${containerElementId} not found.`); return; }
+        container.innerHTML = ""; 
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "row";
+        itemsArray.forEach((item, index) => {
+            const colDiv = document.createElement("div");
+            colDiv.className = "col-12 col-sm-6 col-md-4 mb-2"; // Responsive column layout
+            const checkboxId = `${fieldName.replace(/[^a-zA-Z0-9-_]/g, '')}-${index}`; // Create a safe ID
+            colDiv.innerHTML = `<input type="checkbox" class="btn-check" id="${checkboxId}" name="${fieldName}" value="${item.value}" autocomplete="off"><label class="btn btn-outline-purple" for="${checkboxId}">${item.text}</label>`;
+            rowDiv.appendChild(colDiv);
+        });
+        container.appendChild(rowDiv);
+    }
+
+    // Generate checkboxes for "Other Salesforce Clouds" and "Services of Interest"
+    if (document.getElementById("ownerClouds")) {
+        generateCheckboxes("ownerClouds", nubesSalesforceOptions, "ownerClouds"); 
+    }
+    if (document.getElementById("interestedServices")) {
+        generateCheckboxes("interestedServices", serviciosInteresOptions, "interestedServices"); 
+    }
+
+    /**
+     * Updates the visibility and 'required' status of questions related to Marketing Cloud ownership.
+     */
+    function updateMarketingCloudQuestionsVisibility() {
+        const marketingCloudSiRadio = document.getElementById("marketingCloud-si");
+        const marketingCloudNoRadio = document.getElementById("marketingCloud-no");
+        if (!marketingCloudSiRadio || !marketingCloudNoRadio || !marketingCloudSiQuestions || !marketingCloudNoQuestion) return;
+
+        const siPathRadioNames = ['advantageMc', 'specializedConsulting']; 
+        const noPathRadioName = 'wantsMarketingCloud'; 
+
+        const isSiChecked = marketingCloudSiRadio.checked;
+        const isNoChecked = marketingCloudNoRadio.checked;
+
+        // Toggle visibility of question blocks
+        marketingCloudSiQuestions.classList.toggle("hidden-questions", !isSiChecked);
+        marketingCloudNoQuestion.classList.toggle("hidden-questions", !isNoChecked);
+
+        // Set 'required' attribute based on visibility
+        siPathRadioNames.forEach(name => document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.required = isSiChecked));
+        document.querySelectorAll(`input[name="${noPathRadioName}"]`).forEach(r => r.required = isNoChecked);
+        
+        // Helper to clear radio groups when their parent section is hidden
+        function clearRadioGroupOnHide(groupNameInput, errorIdExact) {
+            // Construct the group container ID (e.g., groupAdvantageMc from advantageMc)
+            const groupNameToFind = groupNameInput === noPathRadioName ? `group${groupNameInput.charAt(0).toUpperCase() + groupNameInput.slice(1)}` : `group${groupNameInput.charAt(0).toUpperCase() + groupNameInput.slice(1)}`;
+            const groupContainer = document.getElementById(groupNameToFind);
+            
+            if (groupContainer) groupContainer.classList.remove("is-invalid-group");
+            
+            const errorMsg = document.getElementById(errorIdExact);
+            if (errorMsg) errorMsg.style.display = "none";
+            
+            // Uncheck and remove invalid class from radios in the group
+            document.querySelectorAll(`input[name="${groupNameInput}"]`).forEach(r => { 
+                r.checked = false; 
+                r.classList.remove('is-invalid'); 
+            });
+        }
+
+        // If "Yes" to having MC is not checked, clear the dependent "Yes" path questions
+        if (!isSiChecked) { 
+            siPathRadioNames.forEach(name => {
+                clearRadioGroupOnHide(name, `${name}Error`); 
+            });
+        }
+        // If "No" to having MC is not checked, clear the dependent "No" path questions
+        if (!isNoChecked) { 
+            clearRadioGroupOnHide(noPathRadioName, "wantsMarketingCloudError"); 
+        }
+    }
+    // Attach event listener to the main Marketing Cloud question radios
+    document.querySelectorAll('input[name="haveMarketingCloud"]').forEach((radio) => {
+        radio.addEventListener("change", updateMarketingCloudQuestionsVisibility);
+    });
+
+    /**
+     * Updates the visibility of the "Other Salesforce Clouds" container.
+     */
+    function updateOtrasNubesVisibility() {
+        const otraNubeSiRadio = document.getElementById("otraNube-si");
+        if (!otraNubeSiRadio || !otrasNubesContainer) return;
+        
+        const isChecked = otraNubeSiRadio.checked;
+        otrasNubesContainer.classList.toggle("hidden-questions", !isChecked);
+        
+        const nubesList = document.getElementById("ownerClouds"); 
+        const nubesError = document.getElementById("nubesSalesforceError");
+
+        // If "Yes" to other clouds is not checked, clear validation and selections
+        if (!isChecked) {
+            if (nubesList) nubesList.classList.remove("is-invalid");
+            if (nubesError) nubesError.style.display = "none";
+            document.querySelectorAll('#ownerClouds input[type="checkbox"]:checked').forEach(cb => cb.checked = false);
+        }
+    }
+    // Attach event listener to the "Other Salesforce Clouds" question radios
+    document.querySelectorAll('input[name="otraNubeSalesforceRadio"]').forEach((radio) => {
+        radio.addEventListener("change", updateOtrasNubesVisibility);
+    });
+    
+    // Clear validation styling when a radio button in a group is selected
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                const groupName = this.name;
+                let errorElementId, groupContainerId;
+
+                // Map radio group names to their container and error message element IDs
+                if (groupName === "wantsMarketingCloud") { 
+                    groupContainerId = "groupWantsMarketingCloud";
+                    errorElementId = "wantsMarketingCloudError";
+                } else if (groupName === "haveMarketingCloud") {
+                    groupContainerId = "groupHaveMarketingCloud";
+                    errorElementId = "haveMarketingCloudError";
+                } else if (groupName === "otraNubeSalesforceRadio") {
+                    groupContainerId = "groupOtraNubeSalesforceRadio";
+                    errorElementId = "otraNubeSalesforceRadioError";
+                } else if (groupName === "advantageMc") {
+                    groupContainerId = "groupAdvantageMc";
+                    errorElementId = "advantageMcError";
+                } else if (groupName === "specializedConsulting") { 
+                    groupContainerId = "groupSpecializedConsulting";
+                    errorElementId = "specializedConsultingError";
+                }
+
+                if (groupContainerId) {
+                    const groupEl = document.getElementById(groupContainerId);
+                    if (groupEl) groupEl.classList.remove('is-invalid-group');
+                }
+                if (errorElementId) {
+                    const errorEl = document.getElementById(errorElementId);
+                    if (errorEl) errorEl.style.display = 'none';
+                }
+            }
+        });
+    });
+
+    // Initial calls to set correct visibility on page load
+    updateMarketingCloudQuestionsVisibility();
+    updateOtrasNubesVisibility();
+
+    /**
+     * Validates a group of radio buttons.
+     * @param {HTMLFormElement} form - The form element.
+     * @param {string} groupName - The 'name' attribute of the radio group.
+     * @param {boolean} isRequiredAndVisible - Whether the group is currently required and visible.
+     * @returns {boolean} True if valid, false otherwise.
+     */
+    function validateRadioGroup(form, groupName, isRequiredAndVisible) {
+        const checkedRadio = form.querySelector(`input[name="${groupName}"]:checked`);
+        let groupContainer, errorMsgElement;
+        
+        // Map group names to their specific container and error message elements
+        if (groupName === 'wantsMarketingCloud') { 
+            groupContainer = document.getElementById('groupWantsMarketingCloud');
+            errorMsgElement = document.getElementById('wantsMarketingCloudError');
+        } else if (groupName === 'haveMarketingCloud') {
+            groupContainer = document.getElementById('groupHaveMarketingCloud');
+            errorMsgElement = document.getElementById('haveMarketingCloudError');
+        } else if (groupName === 'otraNubeSalesforceRadio') {
+            groupContainer = document.getElementById('groupOtraNubeSalesforceRadio');
+            errorMsgElement = document.getElementById('otraNubeSalesforceRadioError');
+        } else if (groupName === 'advantageMc') {
+            groupContainer = document.getElementById('groupAdvantageMc');
+            errorMsgElement = document.getElementById('advantageMcError');
+        } else if (groupName === 'specializedConsulting') { 
+            groupContainer = document.getElementById('groupSpecializedConsulting');
+            errorMsgElement = document.getElementById('specializedConsultingError');
+        } else { 
+             // Fallback for dynamically or differently named groups
+             const firstRadioOfGroup = form.querySelector(`input[name="${groupName}"]`);
+             groupContainer = document.getElementById(`group${groupName.charAt(0).toUpperCase() + groupName.slice(1)}`) || 
+                              (firstRadioOfGroup ? firstRadioOfGroup.closest('.mb-3') : null) || 
+                              document.getElementById(`group${groupName}`);
+             errorMsgElement = groupContainer ? groupContainer.querySelector('.invalid-feedback') : 
+                               (document.getElementById(`${groupName}Error`) || document.getElementById(`${groupName.toLowerCase()}Error`));
+        }
+
+        if (isRequiredAndVisible && !checkedRadio) {
+            if (groupContainer) groupContainer.classList.add("is-invalid-group");
+            if (errorMsgElement) errorMsgElement.style.display = "block";
+            return false;
+        } else { 
+            if (groupContainer) groupContainer.classList.remove("is-invalid-group");
+            if (errorMsgElement) errorMsgElement.style.display = "none";
+            return true;
+        }
+    }
+
+    /**
+     * Validates all required inputs within a specific form step.
+     * @param {string} stepElementId - The ID of the step element to validate.
+     * @returns {boolean} True if all inputs are valid, false otherwise.
+     */
+    function validateStepInputs(stepElementId) {
+        let isThisStepValid = true;
+        const currentStepElement = document.getElementById(stepElementId);
+        if (!currentStepElement) return true; // If step doesn't exist, consider it valid for this check
+        
+        // Reset previous validation states for this step
+        currentStepElement.querySelectorAll('.invalid-feedback:not(#emailErrorPersonal)').forEach(el => el.style.display = 'none');
+        currentStepElement.querySelectorAll('.is-invalid-group').forEach(el => el.classList.remove('is-invalid-group'));
+        currentStepElement.querySelectorAll('.form-control.is-invalid, .form-select.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+
+        const inputsToValidate = Array.from(currentStepElement.querySelectorAll("input[required], select[required]")); 
+        const uniqueRadioNamesInStep = new Set(); // To validate each radio group only once
+
+        inputsToValidate.forEach((inputField) => {
+            let isFieldEffectivelyVisible = !inputField.closest(".hidden-questions"); // Check if field is in a hidden section
+             if (inputField.type === "radio" && inputField.required && isFieldEffectivelyVisible) {
+                 uniqueRadioNamesInStep.add(inputField.name); // Collect radio group names for later validation
+             } else if (isFieldEffectivelyVisible) { // For non-radio inputs (text, email, select, etc.)
+                 if (inputField.id === 'email') { // Special validation for email
+                     const emailValue = inputField.value.trim();
+                     const personalEmailDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com', '@aol.com', '@icloud.com', '@live.com', '@protonmail.com', '@zoho.com', '@gmx.com'];
+                     const isPersonalEmail = personalEmailDomains.some(domain => emailValue.toLowerCase().endsWith(domain));
+                     const emailFeedbackStd = inputField.parentElement.querySelector('.invalid-feedback:not(#emailErrorPersonal)');
+                     
+                     if (!inputField.checkValidity()) { // Standard HTML5 validation
+                         isThisStepValid = false; inputField.classList.add('is-invalid');
+                         if(emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'none'; // Hide personal email error
+                         if(emailFeedbackStd) emailFeedbackStd.style.display = 'block'; // Show standard error
+                     } else if (isPersonalEmail) { // Custom validation for personal emails
+                         isThisStepValid = false; inputField.classList.add('is-invalid');
+                         if(emailFeedbackStd) emailFeedbackStd.style.display = 'none'; // Hide standard error
+                         if(emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'block'; // Show personal email error
+                     } else { // Valid email
+                         inputField.classList.remove('is-invalid');
+                         if(emailFeedbackStd) emailFeedbackStd.style.display = 'none';
+                         if(emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'none';
+                     }
+                 } else if (!inputField.checkValidity()) { // Standard HTML5 validation for other fields
+                     isThisStepValid = false; inputField.classList.add('is-invalid');
+                     const feedback = inputField.parentElement.querySelector('.invalid-feedback');
+                     if (feedback) feedback.style.display = 'block';
+                 } else { // Valid field
+                      inputField.classList.remove('is-invalid');
+                      const feedback = inputField.parentElement.querySelector('.invalid-feedback');
+                      if (feedback) feedback.style.display = 'none';
+                 }
+             }
+        });
+
+        // Validate collected radio groups
+        uniqueRadioNamesInStep.forEach(radioGroupName => {
+            if (!validateRadioGroup(currentStepElement, radioGroupName, true)) { 
+                isThisStepValid = false;
+            }
+        });
+        return isThisStepValid;
+    }
+    
+    // Event listener for the "Next" button on Step 1
+    const btnSiguientePaso1 = document.getElementById("btnSiguientePaso1");
+    if (btnSiguientePaso1) {
+        btnSiguientePaso1.addEventListener("click", function () {
+            if (!formElement || !inputTelefonoElement || !itiInstance) return;
+            formElement.classList.remove("was-validated"); 
+            
+            let step1Valid = validateStepInputs("step1"); 
+            const phoneFeedbackDiv = inputTelefonoElement.parentElement?.parentElement?.querySelector('.invalid-feedback');
+
+            // Specific validation for the phone number input
+             if (inputTelefonoElement.required && inputTelefonoElement.value.trim() === "") {
+                 if (!inputTelefonoElement.classList.contains('is-invalid')) { 
+                      inputTelefonoElement.classList.add("is-invalid");
+                      if (phoneFeedbackDiv) phoneFeedbackDiv.style.display = 'block';
+                      step1Valid = false;
+                 }
+             } else if (inputTelefonoElement.value.trim() !== "" && !itiInstance.isValidNumber()) {
+                 inputTelefonoElement.classList.add("is-invalid");
+                 if (phoneFeedbackDiv) phoneFeedbackDiv.style.display = 'block';
+                 step1Valid = false;
+             } else if (inputTelefonoElement.value.trim() !== "" && itiInstance.isValidNumber()) {
+                  if (!inputTelefonoElement.classList.contains('is-invalid')) {
+                      inputTelefonoElement.classList.remove("is-invalid");
+                      if (phoneFeedbackDiv) phoneFeedbackDiv.style.display = 'none';
+                  }
+             }
+
+            if (step1Valid) {
+                mostrarPaso(2); // Move to step 2 if valid
+            } else {
+                formElement.classList.add("was-validated"); // Show Bootstrap validation styles
+            }
+        });
+    }
+
+    // Event listener for the "Next" button on Step 2
+    const btnSiguientePaso2 = document.getElementById("btnSiguientePaso2");
+    if (btnSiguientePaso2) {
+        btnSiguientePaso2.addEventListener("click", function () {
+            if (!formElement) return;
+            formElement.classList.remove("was-validated");
+            if (validateStepInputs("step2")) {
+                mostrarPaso(3); // Move to step 3 if valid
+            } else {
+                formElement.classList.add("was-validated");
+            }
+        });
+    }
+
+    // Event listener for the final form submission
+    if (formElement) {
+        formElement.addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default HTML form submission
+
+            if (!inputTelefonoElement || !itiInstance) {
+                console.error("Phone input instances not properly initialized.");
+                alert("Form configuration error. Please reload the page.");
+                return;
+            }
+
+            let isEntireFormValid = true; 
+            // Reset validation states
+            formElement.classList.remove("was-validated");
+            document.querySelectorAll('.invalid-feedback:not(#emailErrorPersonal)').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.is-invalid-group').forEach(el => el.classList.remove('is-invalid-group'));
+            document.querySelectorAll('.form-control.is-invalid, .form-select.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            
+            const phoneFeedbackOnSubmit = inputTelefonoElement.parentElement?.parentElement?.querySelector('.invalid-feedback');
+            if (phoneFeedbackOnSubmit) phoneFeedbackOnSubmit.style.display = 'none';
+
+            const emailInputForSubmit = document.getElementById('email');
+            const emailFeedbackStdForSubmit = emailInputForSubmit?.parentElement.querySelector('.invalid-feedback:not(#emailErrorPersonal)');
+            if (emailFeedbackStdForSubmit) emailFeedbackStdForSubmit.style.display = 'none';
+            if (emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'none';
+
+            const nubesListForSubmit = document.getElementById("ownerClouds");
+            if (nubesListForSubmit) nubesListForSubmit.classList.remove("is-invalid");
+            const nubesErrorForSubmit = document.getElementById("nubesSalesforceError");
+            if (nubesErrorForSubmit) nubesErrorForSubmit.style.display = "none";
+            
+            const groupPlanAdquirirOnSubmit = document.getElementById('groupWantsMarketingCloud'); 
+            if (groupPlanAdquirirOnSubmit) groupPlanAdquirirOnSubmit.classList.remove("is-invalid-group");
+            if (planAdquirirMCErrorMsg) planAdquirirMCErrorMsg.style.display = "none";
+            if (recaptchaErrorMsg) recaptchaErrorMsg.style.display = "none";
+
+            // Validate all required fields not in hidden sections (excluding radios, handled separately)
+            formElement.querySelectorAll("input[required]:not([type='radio']), select[required]").forEach((fieldToValidate) => {
+                if (!fieldToValidate.closest(".hidden-questions")) { 
+                    if (fieldToValidate.id === 'email') {
+                        const emailValue = fieldToValidate.value.trim();
+                        const personalEmailDomains = ['@gmail.com', '@yahoo.com', '@hotmail.com', '@outlook.com', '@aol.com', '@icloud.com', '@live.com', '@protonmail.com', '@zoho.com', '@gmx.com'];
+                        const isPersonalEmail = personalEmailDomains.some(domain => emailValue.toLowerCase().endsWith(domain));
+                        const emailFeedbackStd = fieldToValidate.parentElement.querySelector('.invalid-feedback:not(#emailErrorPersonal)');
+
+                        if (!fieldToValidate.checkValidity()) {
+                            isEntireFormValid = false; fieldToValidate.classList.add('is-invalid');
+                            if (emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'none';
+                            if (emailFeedbackStd) emailFeedbackStd.style.display = 'block';
+                        } else if (isPersonalEmail) {
+                            isEntireFormValid = false; fieldToValidate.classList.add('is-invalid');
+                            if (emailFeedbackStd) emailFeedbackStd.style.display = 'none';
+                            if (emailErrorPersonalMsg) emailErrorPersonalMsg.style.display = 'block';
+                        }
+                    } else if (!fieldToValidate.checkValidity()) {
+                        isEntireFormValid = false; fieldToValidate.classList.add('is-invalid');
+                        const feedback = fieldToValidate.parentElement.querySelector('.invalid-feedback');
+                        if (feedback) feedback.style.display = 'block';
+                    }
+                }
+            });
+            
+            // Validate phone number
+            if (inputTelefonoElement.required && inputTelefonoElement.value.trim() === "") {
+                if (!inputTelefonoElement.checkValidity()) { 
+                    isEntireFormValid = false; inputTelefonoElement.classList.add("is-invalid");
+                    if (phoneFeedbackOnSubmit) phoneFeedbackOnSubmit.style.display = 'block';
+                }
+            } else if (inputTelefonoElement.value.trim() !== "" && !itiInstance.isValidNumber()) {
+                 isEntireFormValid = false; inputTelefonoElement.classList.add("is-invalid");
+                 if (phoneFeedbackOnSubmit) phoneFeedbackOnSubmit.style.display = 'block';
+            }
+
+            // Validate all required and visible radio button groups
+            const uniqueRequiredRadioNamesInSubmit = new Set();
+            formElement.querySelectorAll('input[type="radio"][required]').forEach(rb => {
+                 if (!rb.closest('.hidden-questions')) { 
+                     uniqueRequiredRadioNamesInSubmit.add(rb.name);
+                 }
+            });
+            uniqueRequiredRadioNamesInSubmit.forEach(nameOfRadioGroup => {
+                if (!validateRadioGroup(formElement, nameOfRadioGroup, true)) { 
+                    isEntireFormValid = false;
+                }
+            });
+            
+            // Validate "Other Salesforce Clouds" checkboxes if the "Yes" radio is selected
+            const otraNubeSiRadioForSubmit = document.getElementById("otraNube-si");
+            if (otraNubeSiRadioForSubmit && otraNubeSiRadioForSubmit.checked && otrasNubesContainer && !otrasNubesContainer.classList.contains("hidden-questions")) {
+                const nubesCheckedCount = document.querySelectorAll('#ownerClouds input[type="checkbox"]:checked').length;
+                if (nubesCheckedCount === 0) {
+                    if (nubesListForSubmit) nubesListForSubmit.classList.add("is-invalid");
+                    if (nubesErrorForSubmit) nubesErrorForSubmit.style.display = "block";
+                    isEntireFormValid = false;
+                }
+            }
+            
+            // Validate reCAPTCHA
+            if (typeof grecaptcha !== 'undefined' && typeof grecaptcha.getResponse === 'function') {
+                if (grecaptcha.getResponse().length === 0) {
+                    if (recaptchaErrorMsg) recaptchaErrorMsg.style.display = "block";
+                    isEntireFormValid = false;
+                }
+            } else { 
+                const recaptchaDiv = formElement.querySelector('.g-recaptcha');
+                if (recaptchaDiv && recaptchaDiv.offsetWidth > 0 && recaptchaDiv.offsetHeight > 0) { // Check if widget is visible
+                    console.warn("Google reCAPTCHA API (grecaptcha) is not available, but the widget is visible.");
+                    if (recaptchaErrorMsg) {
+                        recaptchaErrorMsg.textContent = "reCAPTCHA service unavailable. Please try reloading.";
+                        recaptchaErrorMsg.style.display = "block";
+                    }
+                    isEntireFormValid = false; 
+                }
+            }
+
+            // If form is not valid, show errors and scroll to the first invalid field
+            if (!isEntireFormValid) {
+                formElement.classList.add("was-validated");
+                // Find the first invalid element to scroll to
+                const firstInvalidElement = formElement.querySelector(".is-invalid, .is-invalid-group .btn-check, #ownerClouds.is-invalid, .g-recaptcha + .recaptcha-error-message[style*='block']"); 
+
+                if (firstInvalidElement) {
+                    let stepOfInvalid = firstInvalidElement.closest(".step");
+                     // Determine the step of the invalid element
+                     if (firstInvalidElement.classList.contains('recaptcha-error-message') || firstInvalidElement.closest('.g-recaptcha')) {
+                         stepOfInvalid = document.getElementById('step3');
+                     } else if (firstInvalidElement.id === 'nubesSalesforceError' || firstInvalidElement.id === 'ownerClouds') {
+                         stepOfInvalid = document.getElementById('step3'); // Assuming these are on step 3
+                     } else if (firstInvalidElement.name && (document.getElementById(`group${firstInvalidElement.name}`) || document.getElementById(`group${firstInvalidElement.name.charAt(0).toUpperCase() + firstInvalidElement.name.slice(1)}`))) {
+                         const radioGroupContainer = document.getElementById(`group${firstInvalidElement.name}`) || document.getElementById(`group${firstInvalidElement.name.charAt(0).toUpperCase() + firstInvalidElement.name.slice(1)}`);
+                         if (radioGroupContainer) stepOfInvalid = radioGroupContainer.closest(".step");
+                     }
+
+                    // If the invalid element is not on the current step, switch to that step
+                    if (stepOfInvalid && !stepOfInvalid.classList.contains("active")) {
+                        const stepIdNumber = parseInt(stepOfInvalid.id.replace("step", ""));
+                        if (!isNaN(stepIdNumber)) mostrarPaso(stepIdNumber);
+                    }
+
+                    // Scroll to the invalid element
+                    setTimeout(() => {
+                        let elementToFocus = firstInvalidElement;
+                         // Adjust focus target for grouped elements or specific error messages
+                         if (firstInvalidElement.classList.contains("is-invalid-group")) { 
+                             elementToFocus = firstInvalidElement.querySelector('input[type="radio"], input[type="checkbox"]') || firstInvalidElement;
+                         } else if (firstInvalidElement.closest('.is-invalid-group')) { 
+                             elementToFocus = firstInvalidElement.closest('.is-invalid-group').querySelector('input[type="radio"], input[type="checkbox"]') || firstInvalidElement.closest('.is-invalid-group') ;
+                         } else if (firstInvalidElement.classList.contains('recaptcha-error-message')) {
+                             elementToFocus = firstInvalidElement.previousElementSibling; // Focus the reCAPTCHA widget
+                         } else if (firstInvalidElement.closest('.g-recaptcha')) {
+                             elementToFocus = firstInvalidElement.closest('.g-recaptcha');
+                         } else if (firstInvalidElement.id === 'ownerClouds' && firstInvalidElement.classList.contains('is-invalid')) {
+                             elementToFocus = firstInvalidElement; // Focus the list container
+                         }
+                        
+                        if (elementToFocus && typeof elementToFocus.scrollIntoView === 'function') {
+                            // Check if element is actually visible before scrolling
+                            if (elementToFocus.offsetWidth > 0 || elementToFocus.offsetHeight > 0 || elementToFocus.getClientRects().length > 0) {
+                                elementToFocus.scrollIntoView({ behavior: "smooth", block: "center" });
+                            } else if (stepOfInvalid && typeof stepOfInvalid.scrollIntoView === 'function') {
+                                // If element is hidden, scroll to its step container
+                                stepOfInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                        }
+                    }, 150); // Delay to allow step change if any
+                }
+                return; // Stop form submission
+            }
+            
+            // --- PAYLOAD CONSTRUCTION for Apex REST API ---
+            const payload = {};
+            payload.firstName = document.getElementById('first_name')?.value || null;
+            payload.lastName = document.getElementById('last_name')?.value || null;
+            payload.email = document.getElementById('email')?.value || null;
+            
+            if (itiInstance) {
+                const countryData = itiInstance.getSelectedCountryData();
+                if (countryData && countryData.dialCode) {
+                    payload.indicative = `+${countryData.dialCode}`; // Phone country code
+                }
+            }
+            payload.mobilePhone = document.getElementById('mobile')?.value || null; // Phone number without country code
+            payload.title = document.getElementById('profile')?.value || null; // Job Title
+            payload.company = document.getElementById('company')?.value || null;
+            payload.industry = document.getElementById('industry')?.value || null;
+            payload.numberOfEmployees = document.getElementById('totalEmployees')?.value || null; // Number of Employees
+            
+            payload.hasMarketingCloud = document.getElementById('marketingCloud-si')?.checked; // Boolean: true if "Yes"
+            
+            const advantageMcRadio = document.querySelector('input[name="advantageMc"]:checked');
+            payload.getsAdvantageOfMC = advantageMcRadio ? (advantageMcRadio.value === 'si') : null; // Boolean or null
+
+            const specializedConsultingRadio = document.querySelector('input[name="specializedConsulting"]:checked');
+            payload.wantsSpecializedConsulting = specializedConsultingRadio ? (specializedConsultingRadio.value === 'si') : null; // Boolean or null
+
+            const wantsMcRadio = document.querySelector('input[name="wantsMarketingCloud"]:checked'); 
+            payload.plansToAcquireMC = wantsMcRadio ? wantsMcRadio.value : null; // String value of selected option or null
+
+            payload.hasOtherSalesforceClouds = document.getElementById('otraNube-si')?.checked; // Boolean
+
+            const ownerCloudsValues = Array.from(document.querySelectorAll('#ownerClouds input[name="ownerClouds"]:checked')).map(cb => cb.value);
+            payload.otherSalesforceClouds = ownerCloudsValues.length > 0 ? ownerCloudsValues.join(';') : null; // Semicolon-separated string or null
+            
+            const interestedServicesValues = Array.from(document.querySelectorAll('#interestedServices input[name="interestedServices"]:checked')).map(cb => cb.value);
+            payload.interestedServices = interestedServicesValues.length > 0 ? interestedServicesValues.join(';') : null; // Semicolon-separated string or null
+            
+            payload.description = document.getElementById('description')?.value || null; // Additional comments
+            
+            // UTM parameters from URL
+            const urlParams = new URLSearchParams(window.location.search);
+            payload.utm_source = urlParams.get('utm_source') || null;
+            payload.utm_medium = urlParams.get('utm_medium') || null;
+            payload.utm_campaign = urlParams.get('utm_campaign') || null;
+            payload.leadSource = "Eventos Salesforce Form"; // Default Lead Source, adjust as needed
+
+            const eventoSelect = document.getElementById("evento"); 
+            if (eventoSelect && eventoSelect.selectedIndex !== -1) { 
+                payload.campaignName = eventoSelect.options[eventoSelect.selectedIndex].text; // Campaign Name from event text
+            } else {
+                payload.campaignName = null; 
+            }
+     
+            // --- AUTHENTICATION AND API SUBMISSION LOGIC ---
+
+            console.log("Payload JSON to be sent (before token attempt):", JSON.stringify(payload, null, 2)); 
+
+            const tokenUrl = "https://test.salesforce.com/services/oauth2/token"; // Use login.salesforce.com for production
+            const clientId = "3MVG9XhRuzJUtKtDu0zLfaZBHlS11fGyUYh8QcJQCQv8RtwrCkPNd4l4dO1sd0bT1nmKgd6tuPJc9JSYi.nPM"; // HARDCODED - INSECURE
+            const clientSecret = "166310D84B31AD3EDFF50156634709B7EE21C0245F96653AC897812D521C285D"; // HARDCODED - INSECURE
+            const sfUsername = "foreroyatesantiago@outlook.com";  // HARDCODED - INSECURE
+            const sfPasswordAndToken = "MrForer@1018$#9L2p0LjKPZiq3olkWaHqDce5"; // HARDCODED (Password + Security Token) - INSECURE
+
+            const tokenParams = new URLSearchParams();
+            tokenParams.append("grant_type", "password");
+            tokenParams.append("client_id", clientId);
+            tokenParams.append("client_secret", clientSecret);
+            tokenParams.append("username", sfUsername);
+            tokenParams.append("password", sfPasswordAndToken);
+
+            console.log("Attempting to get access token...");
+            let alertShownForTokenError = false; // Flag to prevent multiple alerts for the same error
+
+            fetch(tokenUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: tokenParams.toString() 
+            })
+            .then(res => {
+                if (!res.ok) {
+                    // Attempt to parse error as JSON, fallback to text
+                    return res.json().catch(() => res.text()).then(errorBody => {
+                        let detail = "Details not available.";
+                        if (typeof errorBody === 'object' && errorBody !== null && errorBody.error_description) {
+                            detail = errorBody.error_description;
+                        } else if (typeof errorBody === 'string') {
+                            detail = errorBody;
+                        }
+                        console.error(`Error getting token: ${res.status} - ${detail}`, errorBody);
+                        alertShownForTokenError = true;
+                        alert(`Error getting Salesforce token: ${res.status} - ${detail}. Check console and credentials. This is likely a CORS error because this auth flow is not allowed directly from the browser.`);
+                        throw new Error(`Error getting token: ${res.status} - ${detail}`);
+                    });
+                }
+                return res.json();
+            })
+            .then(tokenData => {
+                const newAccessToken = tokenData.access_token;
+                if (!newAccessToken) {
+                    console.error("Access token not received from Salesforce.", tokenData);
+                    alertShownForTokenError = true;
+                    alert("Access token not received from Salesforce. Check console.");
+                    throw new Error("Access token not received from Salesforce.");
+                }
+                console.log("Access token obtained successfully.");
+                
+                // Submit the payload to your Apex REST API
+                return fetch(formElement.action, { 
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${newAccessToken}`, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(payload) 
+                });
+            })
+            .then(response => { 
+                const retURLInput = formElement.querySelector('input[name="retURL"]');
+                const successUrl = (retURLInput && retURLInput.value) ? retURLInput.value : null;
+                if (response.ok) { 
+                    console.log('Form submitted successfully to Salesforce Apex REST API!');
+                    // Try to parse response, could be JSON or just a success message
+                    return response.text().then(text => { 
+                        try { return JSON.parse(text); } catch (e) { return text; } // Return text if not JSON
+                    }).then(data => {
+                        console.log("API Response:", data);
+                         if (successUrl) {
+                             alert('Form submitted successfully!'); 
+                             window.location.href = successUrl; // Redirect on success
+                         } else {
+                             alert('Form submitted successfully!');
+                         }
+                         formElement.reset(); // Reset the form
+                         if (itiInstance) itiInstance.setCountry("co"); // Reset phone input country
+                         if (typeof grecaptcha !== "undefined") grecaptcha.reset(); // Reset reCAPTCHA
+                         mostrarPaso(1); // Go back to the first step
+                    });
+                } else {
+                    // Handle API errors
+                    return response.json().catch(() => response.text()).then(errorBody => {
+                        let detail = "Details not available.";
+                         if (typeof errorBody === 'object' && errorBody !== null) {
+                             // Salesforce Apex REST errors often come in an array
+                             if(Array.isArray(errorBody) && errorBody.length > 0 && errorBody[0].message) detail = errorBody[0].message;
+                             else if(errorBody.message) detail = errorBody.message; // Or a single message object
+                             else detail = JSON.stringify(errorBody); // Fallback to stringifying the object
+                         } else if (typeof errorBody === 'string') {
+                             detail = errorBody; // If error is plain text
+                         }
+                        console.error('Error submitting form to Salesforce Apex REST API:', response.status, detail);
+                        alert(`Error ${response.status}: Could not submit form. ${detail}`);
+                        throw new Error(`API Error: ${response.status} - ${detail}`); 
+                    });
+                }
+            })
+            .catch(error => { 
+                console.error('Error in submission process or token retrieval:', error);
+                if (!alertShownForTokenError) { // Avoid redundant alerts
+                     alert(`Process error: ${error.message}. Check console for more details.`);
+                }
+            });
+        
+        });
+    } else {
+        console.error("Form element #salesforceForm not found.");
+    }
+    //]]>
+    </script>
+</body>
+</html>
